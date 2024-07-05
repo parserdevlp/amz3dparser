@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Amazon 3D Model Parser</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+      background-position: center;
+      line-height: 1.6;
+      margin: 20px;
+      padding: 0;
+      background-color: #212529;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .form-container {
+      max-width: 600px;
+      margin: 0 auto;
+      background-color: #fff;
+      padding: 50px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      align-items: center;
+    }
+
+    .img {
+      align-content: center;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      width: 15%;
+    }
+
+    form {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 10px;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    input[type="submit"] {
+      background-color: #007FFF;
+      border-radius: 10%;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+
+    input[type="submit"]:hover {
+      background-color: #007FFF;
+    }
+
+    .output {
+      margin-top: 20px;
+    }
+
+    .output p {
+      margin-bottom: 10px;
+    }
+
+    .output a {
+      display: inline-block;
+      padding: 10px;
+      border: 2px solid #0066cc;
+      border-radius: 4px;
+      color: #0066cc;
+      text-decoration: none;
+    }
+
+    .output a:hover {
+      text-decoration: underline;
+    }
+
+    .error-message {
+      color: red; 
+    }
+  </style>
+</head>
+<body>
+
+  <div class="form-container">
+    <img src="Amazon_icon.svg.png" class="img">
+    <h1>V3D Parser</h1>
+    <form id="urlForm" method="POST">
+      <label>Amazon URL: <i>(only supports .com, .es, .co.jp, .fr, .in, .it, .de, .co.uk)*</i>
+        <input type="text" name="url" /></label>
+      <input type="submit" value="Get V3D URL" />
+    </form>
+    <div id="preOutput">Processing your request...</div>
+    <div class="output" id="outputDiv">
+      <!-- Output will be displayed here -->
+    </div>
+  </div>
+
+  <script>
+    // Check if the user is logged in
+    if (!sessionStorage.getItem('loggedIn')) {
+      window.location.href = 'login.html';
+    }
+
+    document.getElementById('urlForm').addEventListener('submit', async function (event) {
+      event.preventDefault();
+
+      const url = document.querySelector('input[name="url"]').value.trim();
+      document.getElementById('preOutput').textContent = 'Fetching the model URL...';
+      
+      const response = await fetch('/getmodelurl', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({ url }),
+      });
+
+      const outputDiv = document.getElementById('outputDiv');
+      const result = await response.text();
+      document.getElementById('preOutput').textContent = ''; // Clear the pre-output text
+      outputDiv.innerHTML = result;
+    });
+  </script>
+
+  <script>
+    // Node.js server code embedded for demonstration purposes
+    const express = require('express');
+    const bodyParser = require('body-parser');
+    const axios = require('axios');
+    const { URL } = require('url');
+    const path = require('path');
+
+    const app = express();
+    const port = process.env.PORT || 8000; // Change to 3001 or any other available port
+
+    // Middleware to parse incoming request bodies
+    app.use(bodyParser.urlencoded({ extended: true }));
+
+    // Serve static files from the root directory
+    app.use(express.static(__dirname));
+
+    // Define supported domains
+    const supportedDomains = [
+      'www.amazon.es',
+      'www.amazon.in',
+      'www.amazon.com',
+      'www.amazon.co.uk',
+      'www.amazon.de',
+      'www.amazon.co.jp',
+      'www.amazon.fr',
+      'www.amazon.it',
+      // Add other domains as needed
+    ];
+
+    // Serve the form HTML
+    app.get('/', (req, res) => {
+      res.sendFile(path.join(__dirname, 'index.html'));
+    });
+
+    // Handle POST request to fetch model URL
+    app.post('/getmodelurl', async (req, res) => {
+      const url = req.body.url.trim();
+      let output = '';
+
+      if (!url) {
+        output = '<p class="error-message">Please enter a valid URL.</p>';
+      } else {
+        try {
+          const parsedUrl = new URL(url);
+          const host = parsedUrl.hostname;
+
+          // Check if the host is in the supported domains
+          if (supportedDomains.includes(host)) {
+            const user_agent = 'Amazon.com/28.4.0.100 (Android/14/SomeModel)';
+            const cookies = [
+              'mobile-device-info=dpi:420.0|w:1080|h:2135',
+              'amzn-app-id=Amazon.com/28.4.0.100/18.0.357239.0',
+              'amzn-app-ctxt=1.8%20%7B%22an%22%3A%22Amazon.com%22%2C%22av%22%3A%2228.4.0.100%22%2C%22xv%22%3A%221.15.0%22%2C%22os%22%3A%22Android%22%2C%22ov%22%3A%2214%22%2C%22cp%22%3A788760%2C%22uiv%22%3A4%2C%22ast%22%3A3%2C%22nal%22%3A%221%22%7D',
+              'amzn-app-DeviceType=4',
+              'amzn-app-DeviceModel=SomeModel',
+              'amzn-app-Platform=Android',
+              'amzn-app-OSVersion=14',
+              'amzn-app-Build=SomeBuild',
+            ].join('; ');
+
+            const headers = {
+              'User-Agent': user_agent,
+              'Cookie': cookies,
+            };
+
+            const response = await axios.get(url, { headers });
+            const result = response.data;
+
+            if (result.includes('href="/view-3d')) {
+              const model_url = result.split('href="/view-3d')[1].split('"')[0];
+              output = `V3D Link: <a target="_blank" href="https://${host}/view-3d${model_url}">https://${host}/view-3d${model_url}</a> <i class="error-message"> (The zip file with the model can be found in the network tab in Developer tools*)</i>`;
+            } else {
+              output = '<p class="error-message">No 3D model found.</p>';
+            }
+          } else {
+            output = '<p class="error-message">Unsupported URL. Make sure it is a valid Amazon product URL.</p>';
+          }
+        } catch (error) {
+          output = `<p class="error-message">Error retrieving the URL: ${error.message}</p>`;
+        }
+      }
+
+      res.send(output);
+    });
+
+    // Start the server
+    app.listen(port, () => {
+      console.log(`Server is running on https://localhost:${port}`);
+    });
+  </script>
+</body>
+</html>
