@@ -37,7 +37,7 @@ app.post('/getmodelurl', async (req, res) => {
   let output = '';
 
   if (!url) {
-    output = '<p class="error-message"> Please enter a valid URL.</p>';
+    output = '<p class="error-message"> *Please enter a valid URL.</p>';
   } else {
     try {
       const parsedUrl = new URL(url);
@@ -64,13 +64,13 @@ app.post('/getmodelurl', async (req, res) => {
           const model_url = result.split('href="/view-3d')[1].split('"')[0];
           output = `V3D Link: <a target="_blank" href="https://${host}/view-3d${model_url}">https://${host}/view-3d${model_url}</a> <i> (The zip file with the model can be found in the network tab in Developer tools)*</i>`;
         } else {
-          output = '<p class="error-message"> No 3D model found.</p>';
+          output = '<p class="error-message"> *No V3D found.</p>';
         }
       } else {
-        output = '<p class="error-message"> Unsupported URL. Make sure it is a valid Amazon product URL.</p>';
+        output = '<p class="error-message"> *Unsupported URL. Make sure it is a valid Amazon product URL.</p>';
       }
     } catch (error) {
-      output = `<p class="error-message">Error retrieving the URL: ${error.message}</p>`;
+      output = `<p class="error-message">*Error retrieving the URL: ${error.message}</p>`;
     }
   }
 
