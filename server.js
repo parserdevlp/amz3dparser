@@ -5,7 +5,7 @@ const { URL } = require('url');
 const path = require('path');
 
 const app = express();
-const port = process.env.PORT || 8000; // Change to 3001 or any other available port
+const port = process.env.PORT || 3000; // Change to 3001 or any other available port
 
 // Middleware to parse incoming request bodies
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -16,7 +16,7 @@ app.use(express.static(__dirname));
 // Define supported domains
 const supportedDomains = [
   'www.amazon.es',
-  'www.amazon.in',
+  'www.amazon.in',        
   'www.amazon.com',
   'www.amazon.co.uk',
   'www.amazon.de',
@@ -79,5 +79,5 @@ app.post('/getmodelurl', async (req, res) => {
 
 // Start the server
 app.listen(port, () => {
-  console.log(`Server is running on http://localhost:8000`);
+  console.log(`Server is running on http://localhost:3000`);
 });
