@@ -23,6 +23,9 @@ const supportedDomains = [
   'www.amazon.co.jp',
   'www.amazon.fr',
   'www.amazon.it',
+  'www.amazon.sa',
+  'www.amazon.pl',
+  'www.amazon.ca',
   // Add other domains as needed
 ];
 
